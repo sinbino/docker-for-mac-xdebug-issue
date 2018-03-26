@@ -48,3 +48,6 @@ RUN php /TheTest/artisan db:seed
 ## Setup Test Code
 COPY files/TestCode.php /TheTest/app/Console/Commands/
 CMD [ "php", "artisan", "test" ]
+
+COPY files/Builder.php /TheTest/vendor/laravel/framework/src/Illuminate/Database/Eloquent/
+COPY files/Model.php /TheTest/vendor/laravel/framework/src/Illuminate/Database/Eloquent/
