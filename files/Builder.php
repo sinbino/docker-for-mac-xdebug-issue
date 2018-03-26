@@ -254,14 +254,20 @@ class Builder
      * @param  array  $items
      * @return \Illuminate\Database\Eloquent\Collection
      */
+    // ################################################################
     public function hydrate(array $items)
     {
         $instance = $this->newModelInstance();
 
-        return $instance->newCollection(array_map(function ($item) use ($instance) {
+        $time = microtime(true);
+        $result = array_map(function ($item) use ($instance) {
             return $instance->newFromBuilder($item);
-        }, $items));
+        }, $items);
+        $GLOBALS['profile_1'] = microtime(true) - $time;
+
+        return $instance->newCollection($result);
     }
+    // ################################################################
 
     /**
      * Create a collection of models from a raw query.

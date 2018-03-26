@@ -41,5 +41,6 @@ class TestCode extends Command
     $time = microtime(true) - $time;
     $this->info($users->count() . ' object readed.');
     $this->info('time=' . $time);
+    $this->info('profile_1=' . $GLOBALS['profile_1']);
   }
 }
