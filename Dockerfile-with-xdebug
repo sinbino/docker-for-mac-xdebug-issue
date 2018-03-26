@@ -1,0 +1,5 @@
+
+FROM issue-without-xdebug
+
+## activate xdebug
+COPY files/xdebug.ini /etc/php7/conf.d/

@@ -1,0 +1,50 @@
+
+FROM alpine:3.7
+
+ENV PHP_VERSION=7.1.15-r0
+ENV PHP_XDEBUG_VERSION=2.5.5-r0
+
+## Install PHP for Laravel 
+RUN addgroup -g 82 -S www-data \
+ && adduser -h /var/www -g www-data -s /sbin/nologin -G www-data -SDH -u 82 www-data \
+ && apk add --no-cache \
+    php7=$PHP_VERSION \
+    php7-ctype=$PHP_VERSION \
+    php7-dom=$PHP_VERSION \
+    php7-json=$PHP_VERSION \
+    php7-mbstring=$PHP_VERSION \
+    php7-openssl=$PHP_VERSION \
+    php7-pdo=$PHP_VERSION \
+    php7-pdo_sqlite=$PHP_VERSION \
+    php7-phar=$PHP_VERSION \
+    php7-session=$PHP_VERSION \
+    php7-tokenizer=$PHP_VERSION \
+    php7-xml=$PHP_VERSION \
+    php7-xdebug=$PHP_XDEBUG_VERSION \
+    php7-zlib=$PHP_VERSION
+
+## Install Composer for Laravel
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+ && if [ $(wget -O - https://composer.github.io/installer.sig 2>/dev/null) != $(php -r "echo hash_file('SHA384', 'composer-setup.php');") ]; then \
+      echo 'ERROR: Invalid installer signature'; exit 1 \
+    ;fi \
+ && php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+## Create Laravel Project 
+RUN composer create-project --prefer-dist laravel/laravel TheTest "5.5.*"
+
+## Setup Working Directory
+WORKDIR /TheTest
+
+## Migration database
+COPY files/.env /TheTest/
+RUN touch /TheTest/database/database.sqlite \
+ && php /TheTest/artisan migrate
+
+## Create Dummy 50000 rows
+COPY files/DatabaseSeeder.php /TheTest/database/seeds/
+RUN php /TheTest/artisan db:seed
+
+## Setup Test Code
+COPY files/TestCode.php /TheTest/app/Console/Commands/
+CMD [ "php", "artisan", "test" ]
